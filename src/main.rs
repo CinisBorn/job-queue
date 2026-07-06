@@ -4,7 +4,7 @@ fn main() {
     let connection = Api::connect().unwrap();
     
     loop {
-        let buf = Api::get_client_payload(&connection).unwrap();
-        println!("{:?}", String::from_utf8(buf));
+        let buf = connection.deserializate_request();
+        println!("{:?}", buf);
     }
 }

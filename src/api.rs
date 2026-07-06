@@ -6,6 +6,12 @@ pub struct Api {
     listener: Arc<TcpListener> 
 }
 
+#[derive(Debug)]
+pub struct ClientRequest {
+    pub job_type: String,
+    pub payload: String,
+}
+
 impl Api {
     pub fn connect() -> Result<Self, std::io::Error> {
         let socket = Arc::new(TcpListener::bind("127.0.0.1:0")?);
@@ -22,8 +28,8 @@ impl Api {
         self.listener.clone()
     }
 
-    pub fn get_client_payload(api: &Self) -> Result<Vec<u8>, std::io::Error> {
-        let (mut stream, _) = api.get_listener().accept()?;
+    fn get_client_data(&self) -> Result<Vec<u8>, std::io::Error> {
+        let (mut stream, _) = self.get_listener().accept()?;
         let mut buf = [0u8; 524];
     
         let bytes_read = stream.read(&mut buf)?;
@@ -31,5 +37,20 @@ impl Api {
     
         buf.truncate(bytes_read);
         Ok(buf)
+    }
+
+    pub fn deserializate_request(&self) -> Result<ClientRequest, std::io::Error> {
+        let content = self.get_client_data()?;
+        let request = String::from_utf8(content);
+        let request = request
+            .unwrap()
+            .split(";")
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        Ok(ClientRequest { 
+            job_type: request[0].clone(), 
+            payload: request[1].clone(), 
+        })
     }
 }
