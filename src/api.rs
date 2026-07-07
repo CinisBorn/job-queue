@@ -2,6 +2,7 @@ use std::io::Read;
 use std::net::TcpListener;
 use std::sync::Arc;
 
+#[derive(Debug)]
 pub struct Api {
     listener: Arc<TcpListener> 
 }
