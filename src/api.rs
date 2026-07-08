@@ -2,11 +2,13 @@ use std::io::Read;
 use std::net::TcpListener;
 use std::sync::Arc;
 
+/// The API for receive client request over TCP protocol 
 #[derive(Debug)]
 pub struct Api {
     listener: Arc<TcpListener> 
 }
 
+/// The client request deserialized containing the desired operation and the associated payload. 
 #[derive(Debug)]
 pub struct ClientRequest {
     pub job_type: String,
@@ -14,6 +16,11 @@ pub struct ClientRequest {
 }
 
 impl Api {
+    /// Creates a new socket binding to a random port, then returning a new instance of `Api`. 
+    /// Prints where the port was binded if success. 
+    /// 
+    /// # Error 
+    /// Triggers an error if any associated *I/O* error occurs. 
     pub fn connect() -> Result<Self, std::io::Error> {
         let socket = Arc::new(TcpListener::bind("127.0.0.1:0")?);
         let addr = socket.local_addr()?;
@@ -40,6 +47,10 @@ impl Api {
         Ok(buf)
     }
 
+    /// Deserializes the client request building a new [`ClientRequest`]
+    /// 
+    /// # Error 
+    /// Triggers an error if any associated *I/O* error occurs.
     pub fn deserializate_request(&self) -> Result<ClientRequest, std::io::Error> {
         let content = self.get_client_data()?;
         let request = String::from_utf8(content);
